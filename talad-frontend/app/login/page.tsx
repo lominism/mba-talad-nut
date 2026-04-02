@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,12 +23,11 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      // Mock login since Firebase isn't set up yet
       if (!email.toLowerCase().endsWith("@magicboxsolution.com")) {
         throw new Error("Please use your @magicboxsolution.com email.");
       }
-      localStorage.setItem("mbs_user", email);
-      window.location.href = "/"; // Force full reload to update Navbar state
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Failed to log in.");
     } finally {
@@ -44,7 +45,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pb-6">
             {error && (
               <div className="p-3 rounded-md bg-destructive/15 text-destructive text-sm font-medium">
                 {error}

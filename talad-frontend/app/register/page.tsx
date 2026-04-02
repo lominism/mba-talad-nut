@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,12 +14,19 @@ export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Verify passwords match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
     // Enforce Magic Box Solutions employee domain
     if (!email.toLowerCase().endsWith("@magicboxsolution.com")) {
@@ -33,9 +42,8 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      // Mock registration since Firebase isn't set up yet
-      localStorage.setItem("mbs_user", email);
-      window.location.href = "/";
+      await createUserWithEmailAndPassword(auth, email, password);
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Failed to create an account.");
     } finally {
@@ -53,7 +61,7 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleRegister}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pb-6">
             {error && (
               <div className="p-3 rounded-md bg-destructive/15 text-destructive text-sm font-medium">
                 {error}
@@ -79,6 +87,17 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required 
                 placeholder="Minimum 6 characters"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Verify Password</Label>
+              <Input 
+                id="confirmPassword" 
+                type="password" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required 
+                placeholder="Confirm your password"
               />
             </div>
           </CardContent>

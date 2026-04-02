@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,13 +17,14 @@ export default function PostItemPage() {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   useEffect(() => {
-    // Mock user session verification
-    const user = localStorage.getItem("mbs_user");
-    if (!user) {
-      router.push("/login");
-    } else {
-      setIsLoadingAuth(false);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/login");
+      } else {
+        setIsLoadingAuth(false);
+      }
+    });
+    return () => unsubscribe();
   }, [router]);
 
   const handleSubmit = (e: React.FormEvent) => {
