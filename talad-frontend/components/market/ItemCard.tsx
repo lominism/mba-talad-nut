@@ -8,22 +8,22 @@ export interface ItemType {
   id: string;
   title: string;
   price: number;
-  condition: "New" | "Like New" | "Used" | "Free";
+  quality: "New" | "Used";
   sellerName: string;
   sellerAvatar?: string;
-  imageUrl: string;
+  imageUrls: string[];
   department: string;
 }
 
 export function ItemCard({ item }: { item: ItemType }) {
-  const isFree = item.condition === "Free" || item.price === 0;
+  const isFree = item.price === 0;
 
   return (
     <Card className="overflow-hidden flex flex-col hover:shadow-lg transition-shadow duration-300">
       {/* Image Placeholder */}
-      <div className="relative aspect-square w-full bg-muted/30">
+      <div className="relative h-56 w-full bg-muted/30 shrink-0">
         <img 
-          src={item.imageUrl} 
+          src={item.imageUrls?.[0] || "/api/placeholder/600/600"} 
           alt={item.title}
           className="object-cover w-full h-full"
         />
@@ -39,12 +39,12 @@ export function ItemCard({ item }: { item: ItemType }) {
         <div className="flex justify-between items-start gap-2">
           <h3 className="font-semibold text-lg line-clamp-1">{item.title}</h3>
         </div>
-        <div className="flex gap-2 text-sm text-muted-foreground">
-          <Badge variant="outline" className="font-normal text-xs">{item.condition}</Badge>
+        <div className="flex gap-2 text-sm text-muted-foreground mt-1">
+          <Badge variant="outline" className="font-normal text-xs">{item.quality}</Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="p-4 py-2 flex-grow">
+      <CardContent className="p-4 py-2 flex-grow mb-2">
         <div className="flex items-center gap-2 mt-2">
           <Avatar className="h-6 w-6">
             <AvatarImage src={item.sellerAvatar} />
@@ -56,13 +56,6 @@ export function ItemCard({ item }: { item: ItemType }) {
           </div>
         </div>
       </CardContent>
-
-      <CardFooter className="p-4 pt-4 border-t bg-muted/10">
-        <Button className="w-full bg-blue-600 hover:bg-blue-700 font-medium">
-          <MessageCircle className="mr-2 h-4 w-4" />
-          Reserve / Message
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

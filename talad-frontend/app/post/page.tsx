@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Image as ImageIcon } from "lucide-react";
+import { UploadCloud, Image as ImageIcon, X } from "lucide-react";
 
 export default function PostItemPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -27,14 +29,71 @@ export default function PostItemPage() {
     return () => unsubscribe();
   }, [router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    setIsUploading(true);
+    const newUrls = [...imageUrls];
+    
+    for (const file of e.target.files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "talad-items");
+      
+      try {
+        const res = await fetch("https://api.cloudinary.com/v1_1/ds631lj1s/image/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.secure_url) {
+          newUrls.push(data.secure_url);
+        }
+      } catch (err) {
+        console.error("Cloudinary upload failed:", err);
+      }
+    }
+    
+    setImageUrls(newUrls);
+    setIsUploading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const firebaseUid = auth.currentUser?.uid;
+    if (!firebaseUid) {
+      alert("Please log in to post an item.");
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
+    
+    const payload = {
+      firebaseUid,
+      name: (document.getElementById('title') as HTMLInputElement).value,
+      price: parseFloat((document.getElementById('price') as HTMLInputElement).value) || 0,
+      quality: (document.getElementById('condition') as HTMLSelectElement).value,
+      description: (document.getElementById('description') as HTMLTextAreaElement).value,
+      photoUrls: imageUrls
+    };
+
+    try {
+      const res = await fetch("http://localhost:4000/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) throw new Error("Failed to save post");
+      
       setIsSubmitting(false);
       router.push("/");
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit item, check console");
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoadingAuth) {
@@ -75,9 +134,7 @@ export default function PostItemPage() {
                   defaultValue="Used"
                 >
                   <option value="New">New</option>
-                  <option value="Like New">Like New</option>
                   <option value="Used">Used</option>
-                  <option value="Free">Free / Giveaway</option>
                 </select>
               </div>
             </div>
@@ -91,14 +148,47 @@ export default function PostItemPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Item Photo</Label>
-              <div className="border-2 border-dashed border-input rounded-lg p-8 flex flex-col items-center justify-center gap-2 bg-muted/10 hover:bg-muted/30 transition-colors cursor-pointer">
-                <div className="p-3 bg-muted rounded-full">
-                  <UploadCloud className="h-6 w-6 text-muted-foreground" />
+            <div className="space-y-4">
+              <Label>Item Photos (First photo is cover)</Label>
+              
+              {/* Uploaded Thumbnails Preview */}
+              {imageUrls.length > 0 && (
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {imageUrls.map((url, idx) => (
+                    <div key={idx} className="relative h-24 w-24 shrink-0 rounded-md overflow-hidden border">
+                      <img src={url} alt={`Upload ${idx}`} className="object-cover w-full h-full" />
+                      <button 
+                        type="button"
+                        onClick={() => setImageUrls(imageUrls.filter((_, i) => i !== idx))}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <div className="text-sm font-medium">Click to upload or drag and drop</div>
-                <div className="text-xs text-muted-foreground">PNG, JPG, WEBP up to 5MB</div>
+              )}
+              
+              <div className="relative border-2 border-dashed border-input rounded-lg p-8 flex flex-col items-center justify-center gap-2 bg-muted/10 hover:bg-muted/30 transition-colors">
+                <input 
+                  type="file" 
+                  multiple 
+                  accept="image/*" 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  onChange={handleImageUpload}
+                  disabled={isUploading}
+                />
+                <div className="p-3 bg-muted rounded-full">
+                  {isUploading ? (
+                    <div className="h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <UploadCloud className="h-6 w-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="text-sm font-medium">
+                  {isUploading ? "Uploading to Cloudinary..." : "Click to upload or drag and drop"}
+                </div>
+                <div className="text-xs text-muted-foreground">PNG, JPG, WEBP</div>
               </div>
             </div>
 

@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { UsersModule } from './users/users.module';
+import { ItemsModule } from './items/items.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { AppService } from './app.service';
       autoLoadEntities: true,
       synchronize: true, // Auto-generates SQL tables for development
     }),
+    UsersModule,
+    ItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

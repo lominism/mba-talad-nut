@@ -6,19 +6,62 @@ import { ShoppingBag, PlusCircle, UserCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
   const [user, setUser] = useState<User | null>(null);
+  const [dbProfile, setDbProfile] = useState<{ firstName: string; lastName: string; photoUrl?: string } | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        try {
+          const res = await fetch(`http://localhost:4000/users/${currentUser.uid}`);
+          if (res.ok) {
+            const data = await res.json();
+            setDbProfile(data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch Postgres profile", err);
+        }
+      } else {
+        setDbProfile(null);
+      }
     });
     return () => unsubscribe();
   }, []);
 
   const handleSignOut = () => {
     signOut(auth);
+  };
+
+  const getInitials = () => {
+    if (dbProfile?.firstName && dbProfile?.lastName) {
+      return (dbProfile.firstName[0] + dbProfile.lastName[0]).toUpperCase();
+    }
+    if (!user) return 'MB';
+    if (user.displayName) {
+      const parts = user.displayName.split(' ');
+      if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      return user.displayName.slice(0, 2).toUpperCase();
+    }
+    if (user.email) {
+      const namePart = user.email.split('@')[0];
+      const parts = namePart.split('.');
+      if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      return namePart.slice(0, 2).toUpperCase();
+    }
+    return 'MB';
   };
 
   return (
@@ -49,10 +92,44 @@ export function Navbar() {
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Post Item
               </Link>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted" onClick={handleSignOut} title="Sign Out">
-                <LogOut className="h-5 w-5 text-muted-foreground" />
-                <span className="sr-only">Sign out</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="rounded-full focus-visible:outline-none focus:outline-none">
+                  <Avatar className="h-10 w-10 border shadow-sm transition hover:opacity-80">
+                    <AvatarImage src={dbProfile?.photoUrl || user.photoURL || undefined} alt={user.displayName || user.email || "User"} />
+                    <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold tracking-wider">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 mt-2" align="end">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="font-normal py-3">
+                      <div className="flex flex-col space-y-1.5">
+                        <p className="text-sm font-semibold leading-none text-foreground">My Account</p>
+                        <p className="text-xs leading-none text-muted-foreground truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer py-2.5">
+                    <Link href="/my-listings" className="w-full h-full">
+                      My Listings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer py-2.5">
+                    <Link href="/my-account" className="w-full h-full">
+                      My Account
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer py-2.5 text-destructive focus:bg-destructive/15 focus:text-destructive" onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span className="font-medium">Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <div className="flex items-center gap-2">

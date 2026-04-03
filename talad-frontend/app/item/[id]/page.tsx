@@ -1,0 +1,137 @@
+"use client";
+
+import React, { useState, useEffect, use } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ShoppingBag, Loader2, PackageX } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+export default function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
+  const [displayItem, setDisplayItem] = useState<any>(null);
+  const [mainImage, setMainImage] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchItem() {
+      try {
+        const res = await fetch(`http://127.0.0.1:4000/items/${unwrappedParams.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDisplayItem(data);
+          setMainImage(data.photoUrls?.[0] || "/api/placeholder/600/600");
+        }
+      } catch (err) {
+        console.error("Failed to fetch item", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchItem();
+  }, [unwrappedParams.id]);
+
+  if (loading) {
+    return (
+      <div className="flex bg-muted/10 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+        <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!displayItem) {
+    return (
+      <div className="flex flex-col bg-muted/10 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+        <PackageX className="h-16 w-16 text-muted-foreground opacity-50 mb-4" />
+        <p className="text-xl font-bold text-foreground">Item not found</p>
+        <p className="text-muted-foreground">This item may have been deleted or is no longer available.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 max-w-5xl mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left: Product Image Gallery */}
+        <div className="flex flex-col gap-4">
+          <div className="rounded-xl overflow-hidden border border-muted-foreground/20 shadow-sm bg-muted/30 aspect-[4/3] w-full">
+            <img 
+              src={mainImage} 
+              alt={displayItem.name}
+              className="w-full h-full object-cover transition-all hover:scale-105 duration-500"
+            />
+          </div>
+          
+          {/* Thumbnails */}
+          {displayItem.photoUrls && displayItem.photoUrls.length > 1 && (
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {displayItem.photoUrls.map((url: string, idx: number) => (
+                <button 
+                  key={idx}
+                  onClick={() => setMainImage(url)}
+                  className={`relative rounded-md overflow-hidden h-20 w-24 shrink-0 border-2 transition-all ${mainImage === url ? 'border-blue-600 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                >
+                  <img src={url} alt={`Thumbnail ${idx}`} className="object-cover w-full h-full" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Product Info */}
+        <div className="flex flex-col space-y-6 relative">
+          <div className="space-y-4">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground pr-8">{displayItem.name}</h1>
+            
+            {/* Seller Info (Matching ItemCard Format) */}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Avatar className="h-6 w-6 border shadow-sm">
+                <AvatarImage src={displayItem.seller?.photoUrl || undefined} />
+                <AvatarFallback className="text-xs bg-slate-200 text-slate-700">
+                  {displayItem.seller ? (displayItem.seller.firstName[0] + displayItem.seller.lastName[0]).toUpperCase() : "??"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-sm">
+                <span className="font-medium text-foreground">
+                  {displayItem.seller ? `${displayItem.seller.firstName} ${displayItem.seller.lastName}` : "Unknown"}
+                </span>
+                <span className="text-xs ml-2">({displayItem.seller?.department || "General"})</span>
+              </div>
+            </div>
+
+            {/* Price in Baht or FREE */}
+            <p className="text-4xl font-bold text-blue-600 tracking-tight">
+              {displayItem.price === 0 ? (
+                "FREE"
+              ) : (
+                <>
+                  <span className="text-2xl mr-1 font-medium opacity-80">฿</span>
+                  {displayItem.price.toLocaleString()}
+                </>
+              )}
+            </p>
+
+             {/* Moved Reserve Button Up Here */}
+            <div className="pt-2">
+              <Button size="lg" className="w-full text-lg h-14 bg-blue-600 hover:bg-blue-700 transition" disabled={displayItem.status !== "AVAILABLE"}>
+                <ShoppingBag className="mr-3 h-6 w-6" />
+                {displayItem.status === "AVAILABLE" ? "Reserve Item" : "Reserved"}
+              </Button>
+            </div>
+          </div>
+
+          <Separator className="bg-muted-foreground/20" />
+
+          {/* Description Area */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-xl text-foreground">Description</h3>
+            <p className="text-muted-foreground leading-relaxed text-md whitespace-pre-line">
+              {displayItem.description}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

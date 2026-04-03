@@ -12,9 +12,17 @@ import { Button } from "@/components/ui/button";
 
 export default function RegisterPage() {
   const router = useRouter();
+  
+  // Registration data
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // UI states
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,13 +30,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
 
-    // Verify passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
-    // Enforce Magic Box Solutions employee domain
     if (!email.toLowerCase().endsWith("@magicboxsolution.com")) {
       setError("Only employees with a @magicboxsolution.com email can register.");
       return;
@@ -42,7 +48,28 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // 1. Create the user in Firebase to act as our Security Bouncer
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUid = userCredential.user.uid;
+
+      // 2. Map their Firebase UID to their actual company profile inside PostgreSQL
+      const response = await fetch('http://localhost:4000/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firebaseUid,
+          email,
+          firstName,
+          lastName,
+          nickname: nickname || undefined,
+          department: department || 'General'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create PostgreSQL profile.");
+      }
+
       router.push("/");
     } catch (err: any) {
       setError(err.message || "Failed to create an account.");
@@ -53,7 +80,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex bg-muted/20 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg border-muted/50">
+      <Card className="w-full max-w-lg shadow-lg border-muted/50 my-8">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
           <CardDescription>
@@ -67,7 +94,53 @@ export default function RegisterPage() {
                 {error}
               </div>
             )}
-            <div className="space-y-2">
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input 
+                  id="firstName" 
+                  type="text" 
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input 
+                  id="lastName" 
+                  type="text" 
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required 
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nickname">Nickname (Optional)</Label>
+                <Input 
+                  id="nickname" 
+                  type="text" 
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="department">Department</Label>
+                <Input 
+                  id="department" 
+                  type="text" 
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  required 
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 border-t pt-4 mt-2">
               <Label htmlFor="email">Work Email</Label>
               <Input 
                 id="email" 
