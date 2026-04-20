@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch } from '@nestjs/common';
 import { ItemsService } from './items.service';
+import { ItemStatus } from './entities/item.entity';
 
 @Controller('items')
 export class ItemsController {
@@ -18,5 +19,18 @@ export class ItemsController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.itemsService.findOne(id);
+  }
+
+  @Get('user/:uid')
+  async findByUser(@Param('uid') uid: string) {
+    return await this.itemsService.findByUser(uid);
+  }
+
+  @Patch(':id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: ItemStatus,
+  ) {
+    return await this.itemsService.updateStatus(id, status);
   }
 }

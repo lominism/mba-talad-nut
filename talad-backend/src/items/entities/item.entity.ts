@@ -43,7 +43,7 @@ export class Item {
   // Relationship: Who reserved the item?
   @ManyToOne(() => User, (user) => user.reservedItems, { nullable: true })
   @JoinColumn({ name: 'reserved_by_id' })
-  reservedBy: User;
+  reservedBy: User | null;
 
   @CreateDateColumn()
   createdAt: Date;
