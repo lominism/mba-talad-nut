@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PackageOpen, ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { API_URL } from "@/lib/api-config";
 
 export const dynamic = 'force-dynamic';
 
@@ -13,8 +14,8 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
   
   try {
     const [usersRes, itemsRes] = await Promise.all([
-      fetch("http://127.0.0.1:4000/users", { cache: "no-store" }),
-      fetch("http://127.0.0.1:4000/items", { cache: "no-store" })
+      fetch(`${API_URL}/users`, { cache: "no-store" }),
+      fetch(`${API_URL}/items`, { cache: "no-store" })
     ]);
 
     if (usersRes.ok && itemsRes.ok) {

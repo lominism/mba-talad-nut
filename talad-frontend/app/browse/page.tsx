@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { API_URL } from "@/lib/api-config";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,7 @@ export default async function BrowsePage() {
   let sellers: any[] = [];
   
   try {
-    const res = await fetch("http://127.0.0.1:4000/users", { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/users`, { cache: 'no-store' });
     if (res.ok) {
       sellers = await res.json();
     }

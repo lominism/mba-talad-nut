@@ -1,6 +1,7 @@
 import { ItemCard, ItemType } from "@/components/market/ItemCard";
 import Link from "next/link";
 import { PackageOpen } from "lucide-react";
+import { API_URL } from "@/lib/api-config";
 
 export const revalidate = 0; // Turn off static caching for instant feed updates
 
@@ -8,8 +9,7 @@ export default async function Home() {
   let items: any[] = [];
   
   try {
-    // Note: 127.0.0.1 avoids IPv6 issues in localhost Node fetches sometimes
-    const res = await fetch("http://127.0.0.1:4000/items", { cache: "no-store" });
+    const res = await fetch(`${API_URL}/items`, { cache: "no-store" });
     if (res.ok) {
       items = await res.json();
     }

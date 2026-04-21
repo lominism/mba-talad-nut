@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Edit, Trash2, Phone, User as UserIcon, X, Loader2 } from 'lucide-react';
+import { API_URL } from '@/lib/api-config';
 
 interface UserEntity {
   id: string;
@@ -60,7 +61,7 @@ export default function MyListingsPage() {
 
   const fetchItems = async (uid: string) => {
     try {
-      const res = await fetch(`http://localhost:4000/items/user/${uid}`);
+      const res = await fetch(`${API_URL}/items/user/${uid}`);
       if (res.ok) {
         const data = await res.json();
         setItems(data);
@@ -85,7 +86,7 @@ export default function MyListingsPage() {
     setIsUpdating(true);
     setUpdatingStatusTo(newStatus);
     try {
-      const res = await fetch(`http://localhost:4000/items/${selectedItem.id}/status`, {
+      const res = await fetch(`${API_URL}/items/${selectedItem.id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -112,7 +113,7 @@ export default function MyListingsPage() {
     if (!itemToDelete) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`http://localhost:4000/items/${itemToDelete.id}`, {
+      const res = await fetch(`${API_URL}/items/${itemToDelete.id}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -132,7 +133,7 @@ export default function MyListingsPage() {
     setIsLoadingBuyer(true);
     setBuyerInfo(null);
     try {
-      const res = await fetch(`http://localhost:4000/users`);
+      const res = await fetch(`${API_URL}/users`);
       if (res.ok) {
         const allUsers: UserEntity[] = await res.json();
         const found = allUsers.find(u => u.id === reservedBy.id);

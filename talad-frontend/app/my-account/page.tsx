@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2, Phone } from "lucide-react";
+import { API_URL } from "@/lib/api-config";
 
 const DEPARTMENTS = [
   "MBS-Sales",
@@ -47,7 +48,7 @@ export default function MyAccountPage() {
       setCurrentUser(user);
       
       try {
-        const res = await fetch(`http://localhost:4000/users/${user.uid}`);
+        const res = await fetch(`${API_URL}/users/${user.uid}`);
         if (res.ok) {
           const profile = await res.json();
           setFirstName(profile.firstName || "");
@@ -95,7 +96,7 @@ export default function MyAccountPage() {
     setIsSaving(true);
     
     try {
-      const res = await fetch(`http://localhost:4000/users/${currentUser.uid}`, {
+      const res = await fetch(`${API_URL}/users/${currentUser.uid}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

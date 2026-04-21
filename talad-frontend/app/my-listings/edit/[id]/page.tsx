@@ -4,6 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { API_URL } from '@/lib/api-config';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
 
     async function fetchItem() {
       try {
-        const res = await fetch(`http://127.0.0.1:4000/items/${unwrappedParams.id}`);
+        const res = await fetch(`${API_URL}/items/${unwrappedParams.id}`);
         if (res.ok) {
           const data = await res.json();
           setTitle(data.name || "");
@@ -107,7 +108,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
     };
 
     try {
-      const res = await fetch(`http://127.0.0.1:4000/items/${unwrappedParams.id}`, {
+      const res = await fetch(`${API_URL}/items/${unwrappedParams.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

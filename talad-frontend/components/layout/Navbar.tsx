@@ -8,6 +8,7 @@ import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { API_URL } from '@/lib/api-config';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +29,7 @@ export function Navbar() {
       setUser(currentUser);
       if (currentUser) {
         try {
-          const res = await fetch(`http://localhost:4000/users/${currentUser.uid}`);
+          const res = await fetch(`${API_URL}/users/${currentUser.uid}`);
           if (res.ok) {
             const data = await res.json();
             setDbProfile(data);

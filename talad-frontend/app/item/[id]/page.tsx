@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/api-config";
 
 export default function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -33,7 +34,7 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
   useEffect(() => {
     async function fetchItem() {
       try {
-        const res = await fetch(`http://127.0.0.1:4000/items/${unwrappedParams.id}`);
+        const res = await fetch(`${API_URL}/items/${unwrappedParams.id}`);
         if (res.ok) {
           const data = await res.json();
           setDisplayItem(data);
@@ -54,7 +55,7 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
     setReserving(true);
     setReserveError(null);
     try {
-      const res = await fetch(`http://127.0.0.1:4000/items/${unwrappedParams.id}/status`, {
+      const res = await fetch(`${API_URL}/items/${unwrappedParams.id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'RESERVED', firebaseUid: user.uid }),

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, Image as ImageIcon, X } from "lucide-react";
+import { API_URL } from "@/lib/api-config";
 
 export default function PostItemPage() {
   const router = useRouter();
@@ -79,7 +80,7 @@ export default function PostItemPage() {
     };
 
     try {
-      const res = await fetch("http://localhost:4000/items", {
+      const res = await fetch(`${API_URL}/items`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
