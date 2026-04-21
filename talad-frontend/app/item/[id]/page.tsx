@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingBag, Loader2, PackageX, Lock } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { ShoppingBag, Loader2, PackageX, Lock, AlertCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -20,6 +21,7 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
   const [user, setUser] = useState<User | null>(null);
   const [reserving, setReserving] = useState(false);
   const [reserveError, setReserveError] = useState<string | null>(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -48,6 +50,7 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
 
   const handleReserve = async () => {
     if (!user) return;
+    setIsConfirmModalOpen(false);
     setReserving(true);
     setReserveError(null);
     try {
@@ -123,12 +126,12 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
               <Avatar className="h-6 w-6 border shadow-sm">
                 <AvatarImage src={displayItem.seller?.photoUrl || undefined} />
                 <AvatarFallback className="text-xs bg-slate-200 text-slate-700">
-                  {displayItem.seller ? (displayItem.seller.firstName[0] + displayItem.seller.lastName[0]).toUpperCase() : "??"}
+                  {displayItem.seller ? (displayItem.seller.nickname || displayItem.seller.firstName).slice(0, 2).toUpperCase() : "??"}
                 </AvatarFallback>
               </Avatar>
               <div className="text-sm">
                 <span className="font-medium text-foreground">
-                  {displayItem.seller ? `${displayItem.seller.firstName} ${displayItem.seller.lastName}` : "Unknown"}
+                  {displayItem.seller ? (displayItem.seller.nickname || displayItem.seller.firstName) : "Unknown"}
                 </span>
                 <span className="text-xs ml-2">({displayItem.seller?.department || "General"})</span>
               </div>
@@ -163,7 +166,7 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
                   size="lg"
                   className="w-full text-lg h-14 bg-blue-600 hover:bg-blue-700 transition"
                   disabled={displayItem.status !== 'AVAILABLE' || reserving}
-                  onClick={handleReserve}
+                  onClick={() => setIsConfirmModalOpen(true)}
                 >
                   {reserving ? (
                     <Loader2 className="mr-3 h-6 w-6 animate-spin" />
@@ -190,6 +193,32 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
       </div>
+
+      <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-blue-600" />
+              Confirm Reservation
+            </DialogTitle>
+            <DialogDescription className="text-sm pt-2">
+              Are you sure you want to reserve <strong>{displayItem.name}</strong>? 
+              This will notify the seller.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end border-t pt-4 mt-4">
+            <Button variant="ghost" onClick={() => setIsConfirmModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleReserve}
+            >
+              Confirm Reservation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

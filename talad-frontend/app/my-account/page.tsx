@@ -6,10 +6,20 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, Phone } from "lucide-react";
+
+const DEPARTMENTS = [
+  "MBS-Sales",
+  "MBS-Dev",
+  "MBS-QA",
+  "MBS-HR",
+  "MBS-Executive",
+  "MBS-Design",
+];
 
 export default function MyAccountPage() {
   const router = useRouter();
@@ -25,6 +35,7 @@ export default function MyAccountPage() {
   const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -45,6 +56,7 @@ export default function MyAccountPage() {
           setDepartment(profile.department || "");
           setEmail(profile.email || "");
           setPhotoUrl(profile.photoUrl || "");
+          setPhoneNumber(profile.phoneNumber || "");
         }
       } catch (err) {
         console.error("Failed to load profile", err);
@@ -91,7 +103,8 @@ export default function MyAccountPage() {
           lastName,
           nickname,
           department,
-          photoUrl
+          photoUrl,
+          phoneNumber
         })
       });
       
@@ -107,6 +120,14 @@ export default function MyAccountPage() {
   const getInitials = () => {
     if (firstName && lastName) return (firstName[0] + lastName[0]).toUpperCase();
     return "MB";
+  };
+
+  const formatPhoneNumber = (value: string) => {
+    // Strip everything except digits
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
   };
 
   if (isLoadingAuth) {
@@ -127,7 +148,7 @@ export default function MyAccountPage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSaveProfile}>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 pb-6">
             
             {/* Avatar Upload Box */}
             <div className="flex flex-col items-center justify-center space-y-3 mb-6">
@@ -182,8 +203,34 @@ export default function MyAccountPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="department">Department</Label>
-                <Input id="department" value={department} onChange={e => setDepartment(e.target.value)} required />
+                <Select value={department} onValueChange={(val) => setDepartment(val as string)}>
+                  <SelectTrigger id="department" className="w-full">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEPARTMENTS.map(dept => (
+                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+
+            {/* Phone Number */}
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber" className="flex items-center gap-1.5">
+                <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                Phone Number <span className="text-muted-foreground font-normal">(Optional — But a good idea so seller can contact you)</span>
+              </Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                placeholder="e.g. 081-234-5678"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(formatPhoneNumber(e.target.value))}
+                maxLength={12}
+                pattern="\d{3}-\d{3}-\d{4}"
+              />
             </div>
 
           </CardContent>

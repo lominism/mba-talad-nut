@@ -9,12 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Phone, User as UserIcon, X, Loader2 } from 'lucide-react';
 
 interface UserEntity {
   id: string;
   firstName: string;
   lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  department?: string;
+  photoUrl?: string;
 }
 
 interface Item {
@@ -33,6 +37,12 @@ export default function MyListingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
+  const [buyerInfo, setBuyerInfo] = useState<UserEntity | null>(null);
+  const [isBuyerModalOpen, setIsBuyerModalOpen] = useState(false);
+  const [isLoadingBuyer, setIsLoadingBuyer] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updatingStatusTo, setUpdatingStatusTo] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -72,6 +82,8 @@ export default function MyListingsPage() {
 
   const updateStatus = async (newStatus: string) => {
     if (!selectedItem) return;
+    setIsUpdating(true);
+    setUpdatingStatusTo(newStatus);
     try {
       const res = await fetch(`http://localhost:4000/items/${selectedItem.id}/status`, {
         method: 'PATCH',
@@ -85,6 +97,9 @@ export default function MyListingsPage() {
       }
     } catch (err) {
       console.error("Failed to update status", err);
+    } finally {
+      setIsUpdating(false);
+      setUpdatingStatusTo(null);
     }
   };
 
@@ -95,6 +110,7 @@ export default function MyListingsPage() {
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
+    setIsDeleting(true);
     try {
       const res = await fetch(`http://localhost:4000/items/${itemToDelete.id}`, {
         method: 'DELETE',
@@ -106,7 +122,28 @@ export default function MyListingsPage() {
       }
     } catch (err) {
       console.error("Failed to delete item", err);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleBuyerClick = async (reservedBy: UserEntity) => {
+    setIsBuyerModalOpen(true);
+    setIsLoadingBuyer(true);
+    setBuyerInfo(null);
+    try {
+      const res = await fetch(`http://localhost:4000/users`);
+      if (res.ok) {
+        const allUsers: UserEntity[] = await res.json();
+        const found = allUsers.find(u => u.id === reservedBy.id);
+        setBuyerInfo(found || reservedBy);
+      } else {
+        setBuyerInfo(reservedBy);
+      }
+    } catch {
+      setBuyerInfo(reservedBy);
+    }
+    setIsLoadingBuyer(false);
   };
 
   const renderBadge = (status: string) => {
@@ -174,12 +211,16 @@ export default function MyListingsPage() {
                       </td>
                       <td className="px-6 py-4 text-slate-600 font-medium">
                         {item.reservedBy ? (
-                          <div className="flex items-center gap-2">
-                            <div className="h-6 w-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+                          <button
+                            onClick={() => handleBuyerClick(item.reservedBy!)}
+                            className="flex items-center gap-2 hover:underline hover:text-blue-700 transition-colors group/buyer cursor-pointer"
+                          >
+                            <div className="h-6 w-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
                               {item.reservedBy.firstName[0]}{item.reservedBy.lastName[0]}
                             </div>
-                            {item.reservedBy.firstName} {item.reservedBy.lastName}
-                          </div>
+                            <span className="font-medium">{item.reservedBy.firstName} {item.reservedBy.lastName}</span>
+                            <Phone className="h-3 w-3 text-blue-400 opacity-0 group-hover/buyer:opacity-100 transition-opacity" />
+                          </button>
                         ) : (
                           <span className="text-slate-400 italic">None</span>
                         )}
@@ -227,7 +268,15 @@ export default function MyListingsPage() {
           <div className="flex flex-col gap-3 py-6">
             {selectedItem?.status === 'RESERVED' && (
               <div className="space-y-4">
-                <Button size="lg" onClick={() => updateStatus('SOLD')} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold">
+                <Button 
+                  size="lg" 
+                  disabled={isUpdating}
+                  onClick={() => updateStatus('SOLD')} 
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold"
+                >
+                  {isUpdating && updatingStatusTo === 'SOLD' ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
                   Confirm Sale (Mark as Sold)
                 </Button>
                 <div className="flex items-center gap-4 text-sm text-slate-400 my-2">
@@ -235,7 +284,16 @@ export default function MyListingsPage() {
                   <span>OR</span>
                   <div className="flex-1 h-[1px] bg-slate-200"></div>
                 </div>
-                <Button size="lg" variant="outline" onClick={() => updateStatus('AVAILABLE')} className="w-full text-amber-700 border-amber-200 hover:bg-amber-50 hover:text-amber-800 font-medium">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  disabled={isUpdating}
+                  onClick={() => updateStatus('AVAILABLE')} 
+                  className="w-full text-amber-700 border-amber-200 hover:bg-amber-50 hover:text-amber-800 font-medium"
+                >
+                  {isUpdating && updatingStatusTo === 'AVAILABLE' ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
                   Cancel Reservation (Buyer Backed Out)
                 </Button>
               </div>
@@ -243,7 +301,15 @@ export default function MyListingsPage() {
             
             {selectedItem?.status === 'AVAILABLE' && (
               <div className="space-y-4">
-                <Button size="lg" onClick={() => updateStatus('SOLD')} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold">
+                <Button 
+                  size="lg" 
+                  disabled={isUpdating}
+                  onClick={() => updateStatus('SOLD')} 
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold"
+                >
+                  {isUpdating && updatingStatusTo === 'SOLD' ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
                   Mark as Sold (Sold elsewhere)
                 </Button>
               </div>
@@ -271,8 +337,100 @@ export default function MyListingsPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-end border-t pt-4 mt-4">
-             <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
-             <Button variant="destructive" onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 focus:ring-red-600">Delete Listing</Button>
+             <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting}>Cancel</Button>
+             <Button 
+               variant="destructive" 
+               onClick={confirmDelete} 
+               className="bg-red-600 hover:bg-red-700 text-white focus:ring-red-600"
+               disabled={isDeleting}
+             >
+                {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isDeleting ? "Deleting..." : "Delete Listing"}
+             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Buyer Info Modal */}
+      <Dialog open={isBuyerModalOpen} onOpenChange={setIsBuyerModalOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <UserIcon className="h-5 w-5 text-blue-600" />
+              Buyer Information
+            </DialogTitle>
+            <DialogDescription className="text-sm pt-1">
+              Contact details for the person who reserved this item.
+            </DialogDescription>
+          </DialogHeader>
+
+          {isLoadingBuyer ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin h-6 w-6 border-2 border-blue-500 rounded-full border-t-transparent" />
+            </div>
+          ) : buyerInfo ? (
+            <div className="py-4 space-y-4">
+              {/* Avatar + Name */}
+              <div className="flex items-center gap-4 pb-4 border-b">
+                <div className="h-14 w-14 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-sm">
+                  {buyerInfo.photoUrl ? (
+                    <img src={buyerInfo.photoUrl} alt="" className="h-full w-full rounded-full object-cover" />
+                  ) : (
+                    <>{buyerInfo.firstName[0]}{buyerInfo.lastName[0]}</>
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 text-base">{buyerInfo.firstName} {buyerInfo.lastName}</p>
+                  {buyerInfo.department && (
+                    <p className="text-xs text-slate-500 mt-0.5">{buyerInfo.department}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                  <Phone className="h-4 w-4 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Phone</p>
+                  {buyerInfo.phoneNumber ? (
+                    <a
+                      href={`tel:${buyerInfo.phoneNumber}`}
+                      className="text-sm font-semibold text-emerald-700 hover:underline"
+                    >
+                      {buyerInfo.phoneNumber}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">Not provided</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Email */}
+              {buyerInfo.email && (
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <UserIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Email</p>
+                    <a
+                      href={`mailto:${buyerInfo.email}`}
+                      className="text-sm font-semibold text-blue-700 hover:underline"
+                    >
+                      {buyerInfo.email}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          <DialogFooter className="border-t pt-4">
+            <Button variant="ghost" className="text-slate-500" onClick={() => setIsBuyerModalOpen(false)}>
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

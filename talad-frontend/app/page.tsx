@@ -24,7 +24,7 @@ export default async function Home() {
     price: Number(item.price),
     quality: item.quality,
     status: item.status,
-    sellerName: item.seller ? `${item.seller.firstName} ${item.seller.lastName}` : "Guest",
+    sellerName: item.seller ? (item.seller.nickname || item.seller.firstName) : "Guest",
     sellerAvatar: item.seller?.photoUrl,
     imageUrls: item.photoUrls || [],
     department: item.seller?.department || "General",

@@ -44,7 +44,7 @@ export class UsersService {
     return await this.usersRepository.findOne({ where: { firebaseUid } });
   }
 
-  async updateProfile(firebaseUid: string, payload: { firstName?: string; lastName?: string; nickname?: string; department?: string; photoUrl?: string }) {
+  async updateProfile(firebaseUid: string, payload: { firstName?: string; lastName?: string; nickname?: string; department?: string; photoUrl?: string; phoneNumber?: string }) {
     const user = await this.findByFirebaseUid(firebaseUid);
     if (!user) return null;
     Object.assign(user, payload);

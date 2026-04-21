@@ -5,18 +5,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
+import { AppDataSource } from './data-source';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, 
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      autoLoadEntities: true,
-      synchronize: true, // Auto-generates SQL tables for development
-    }),
+    TypeOrmModule.forRoot(AppDataSource.options),
     UsersModule,
     ItemsModule,
   ],

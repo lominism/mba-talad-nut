@@ -46,7 +46,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
     price: Number(item.price),
     quality: item.quality,
     status: item.status,
-    sellerName: `${user.firstName} ${user.lastName}`,
+    sellerName: user.nickname || user.firstName,
     sellerAvatar: user.photoUrl,
     imageUrls: item.photoUrls || [],
     department: user.department || "General",
@@ -62,10 +62,10 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
       <div className="flex flex-col md:flex-row items-center gap-6 mb-10 p-6 bg-card rounded-xl border border-muted shadow-sm">
         <Avatar className="h-24 w-24 border-4 border-background shadow-md">
           <AvatarImage src={user.photoUrl} alt={`${user.firstName} ${user.lastName}`} />
-          <AvatarFallback className="text-2xl">{user.firstName?.[0]}{user.lastName?.[0]}</AvatarFallback>
+          <AvatarFallback className="text-2xl outline-none">{(user.nickname || user.firstName).slice(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="text-center md:text-left space-y-2 flex-1">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{user.firstName} {user.lastName}</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{user.nickname || user.firstName}</h1>
           <p className="text-muted-foreground text-lg">{user.department}</p>
         </div>
         <div className="flex flex-col gap-2 items-center md:items-end">
@@ -95,7 +95,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
             <PackageOpen className="h-10 w-10 text-muted-foreground opacity-60" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">No Items To Display</h2>
-          <p className="text-muted-foreground mt-2 text-md max-w-sm">{user.firstName} hasn't listed any items.</p>
+          <p className="text-muted-foreground mt-2 text-md max-w-sm">{user.nickname || user.firstName} hasn't listed any items.</p>
         </div>
       )}
     </div>

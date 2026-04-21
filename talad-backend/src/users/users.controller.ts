@@ -23,7 +23,7 @@ export class UsersController {
   @Patch(':firebaseUid')
   async updateProfile(
     @Param('firebaseUid') firebaseUid: string, 
-    @Body() body: { firstName?: string; lastName?: string; nickname?: string; department?: string; photoUrl?: string }
+    @Body() body: { firstName?: string; lastName?: string; nickname?: string; department?: string; photoUrl?: string; phoneNumber?: string }
   ) {
     return await this.usersService.updateProfile(firebaseUid, body);
   }

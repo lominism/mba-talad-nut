@@ -38,10 +38,12 @@ export default async function BrowsePage() {
                   <div className="flex items-center gap-4">
                     <Avatar className="h-14 w-14 border-2 border-background shadow-sm">
                       <AvatarImage src={seller.photoUrl} />
-                      <AvatarFallback>{seller.firstName?.[0]}{seller.lastName?.[0]}</AvatarFallback>
+                      <AvatarFallback className="bg-slate-200 text-slate-700">
+                        {(seller.nickname || seller.firstName)?.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-1">
-                      <h3 className="font-semibold text-lg leading-none">{seller.firstName} {seller.lastName}</h3>
+                      <h3 className="font-semibold text-lg leading-none">{seller.nickname || seller.firstName}</h3>
                       <p className="text-sm text-muted-foreground">{seller.department}</p>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />

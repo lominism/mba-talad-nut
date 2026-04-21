@@ -27,6 +27,9 @@ export class User {
   @Column({ nullable: true })
   photoUrl: string;
 
+  @Column({ nullable: true })
+  phoneNumber: string;
+
   // A user can post many items to sell
   @OneToMany(() => Item, (item) => item.seller)
   items: Item[];

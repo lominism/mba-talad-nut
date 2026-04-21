@@ -23,9 +23,11 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
+      
       if (!email.toLowerCase().endsWith("@magicboxsolution.com")) {
         throw new Error("Please use your @magicboxsolution.com email.");
       }
+      
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/");
     } catch (err: any) {
