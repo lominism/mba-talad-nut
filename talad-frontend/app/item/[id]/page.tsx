@@ -5,14 +5,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingBag, Loader2, PackageX } from "lucide-react";
+import { ShoppingBag, Loader2, PackageX, Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 export default function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
+  const router = useRouter();
   const [displayItem, setDisplayItem] = useState<any>(null);
   const [mainImage, setMainImage] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [reserving, setReserving] = useState(false);
+  const [reserveError, setReserveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     async function fetchItem() {
@@ -31,6 +45,26 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
     }
     fetchItem();
   }, [unwrappedParams.id]);
+
+  const handleReserve = async () => {
+    if (!user) return;
+    setReserving(true);
+    setReserveError(null);
+    try {
+      const res = await fetch(`http://127.0.0.1:4000/items/${unwrappedParams.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'RESERVED', firebaseUid: user.uid }),
+      });
+      if (!res.ok) throw new Error('Failed to reserve item.');
+      const updated = await res.json();
+      setDisplayItem(updated);
+    } catch (err: any) {
+      setReserveError(err.message || 'Something went wrong.');
+    } finally {
+      setReserving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -112,12 +146,36 @@ export default function ItemDetail({ params }: { params: Promise<{ id: string }>
               )}
             </p>
 
-             {/* Moved Reserve Button Up Here */}
-            <div className="pt-2">
-              <Button size="lg" className="w-full text-lg h-14 bg-blue-600 hover:bg-blue-700 transition" disabled={displayItem.status !== "AVAILABLE"}>
-                <ShoppingBag className="mr-3 h-6 w-6" />
-                {displayItem.status === "AVAILABLE" ? "Reserve Item" : "Reserved"}
-              </Button>
+             {/* Reserve Button */}
+            <div className="pt-2 space-y-2">
+              {!user ? (
+                <Button size="lg" className="w-full text-lg h-14 bg-slate-800 hover:bg-slate-700 transition" onClick={() => router.push('/login')}>
+                  <Lock className="mr-3 h-5 w-5" />
+                  Login to Reserve
+                </Button>
+              ) : user.uid === displayItem.seller?.firebaseUid ? (
+                <Button size="lg" className="w-full text-lg h-14" variant="outline" disabled>
+                  <ShoppingBag className="mr-3 h-6 w-6" />
+                  This is your listing
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  className="w-full text-lg h-14 bg-blue-600 hover:bg-blue-700 transition"
+                  disabled={displayItem.status !== 'AVAILABLE' || reserving}
+                  onClick={handleReserve}
+                >
+                  {reserving ? (
+                    <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                  ) : (
+                    <ShoppingBag className="mr-3 h-6 w-6" />
+                  )}
+                  {reserving ? 'Reserving...' : displayItem.status === 'AVAILABLE' ? 'Reserve Item' : 'Reserved'}
+                </Button>
+              )}
+              {reserveError && (
+                <p className="text-sm text-destructive font-medium text-center">{reserveError}</p>
+              )}
             </div>
           </div>
 

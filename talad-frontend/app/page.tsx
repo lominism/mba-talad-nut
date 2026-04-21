@@ -23,6 +23,7 @@ export default async function Home() {
     title: item.name,
     price: Number(item.price),
     quality: item.quality,
+    status: item.status,
     sellerName: item.seller ? `${item.seller.firstName} ${item.seller.lastName}` : "Guest",
     sellerAvatar: item.seller?.photoUrl,
     imageUrls: item.photoUrls || [],

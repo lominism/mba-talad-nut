@@ -10,6 +10,11 @@ export class UsersController {
     return await this.usersService.createFromFirebase(body);
   }
 
+  @Get()
+  async findAll() {
+    return await this.usersService.findAll();
+  }
+
   @Get(':firebaseUid')
   async getProfile(@Param('firebaseUid') firebaseUid: string) {
     return await this.usersService.findByFirebaseUid(firebaseUid);

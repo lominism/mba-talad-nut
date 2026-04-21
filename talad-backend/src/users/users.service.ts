@@ -10,6 +10,17 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
+  async findAll() {
+    const users = await this.usersRepository.find({ relations: ['items'] });
+    return users.map(user => {
+      const { items, ...rest } = user;
+      return {
+        ...rest,
+        itemCount: items ? items.filter(item => item.status === 'AVAILABLE').length : 0 // Show count of available items
+      };
+    });
+  }
+
   async createFromFirebase(payload: { firebaseUid: string; email: string; firstName: string; lastName: string; department?: string }) {
     // Check if user already exists
     const existing = await this.usersRepository.findOne({ where: { firebaseUid: payload.firebaseUid } });

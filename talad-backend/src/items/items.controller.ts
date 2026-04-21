@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { ItemStatus } from './entities/item.entity';
 
@@ -30,7 +30,21 @@ export class ItemsController {
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: ItemStatus,
+    @Body('firebaseUid') firebaseUid?: string,
   ) {
-    return await this.itemsService.updateStatus(id, status);
+    return await this.itemsService.updateStatus(id, status, firebaseUid);
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    return await this.itemsService.update(id, body);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return await this.itemsService.remove(id);
   }
 }

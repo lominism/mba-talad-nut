@@ -35,10 +35,12 @@ export default function RegisterPage() {
       return;
     }
 
+    /* 
     if (!email.toLowerCase().endsWith("@magicboxsolution.com")) {
       setError("Only employees with a @magicboxsolution.com email can register.");
       return;
     }
+    */
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");

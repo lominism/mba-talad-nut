@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 
 interface UserEntity {
   id: string;
@@ -29,6 +31,8 @@ export default function MyListingsPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -84,6 +88,27 @@ export default function MyListingsPage() {
     }
   };
 
+  const handleDeleteClick = (item: Item) => {
+    setItemToDelete(item);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      const res = await fetch(`http://localhost:4000/items/${itemToDelete.id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setIsDeleteModalOpen(false);
+        setItemToDelete(null);
+        if (user) fetchItems(user.uid);
+      }
+    } catch (err) {
+      console.error("Failed to delete item", err);
+    }
+  };
+
   const renderBadge = (status: string) => {
     if (status === 'AVAILABLE') {
       return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors shadow-sm cursor-pointer border-emerald-300 px-3 py-1 text-xs uppercase tracking-wider">Listed</Badge>;
@@ -113,12 +138,13 @@ export default function MyListingsPage() {
                   <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">Name</th>
                   <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">Status</th>
                   <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">Reserved By</th>
+                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y relative bg-white">
                 {items.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center">
                         <p className="text-lg font-medium text-slate-600">No listings found</p>
                         <p className="text-sm mt-1 mb-4">You have not posted any items yet.</p>
@@ -157,6 +183,24 @@ export default function MyListingsPage() {
                         ) : (
                           <span className="text-slate-400 italic">None</span>
                         )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-slate-400 transition-colors cursor-pointer">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4 text-slate-600" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => router.push(`/my-listings/edit/${item.id}`)} className="cursor-pointer">
+                              <Edit className="mr-2 h-4 w-4" />
+                              <span>Edit</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteClick(item)} className="cursor-pointer text-red-600 focus:text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Delete</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
                   ))
@@ -214,6 +258,21 @@ export default function MyListingsPage() {
           
           <DialogFooter className="sm:justify-center border-t pt-4">
             <Button variant="ghost" className="text-slate-500" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-red-600">Confirm Deletion</DialogTitle>
+            <DialogDescription className="text-sm pt-2">
+              Are you sure you want to delete <strong>{itemToDelete?.name}</strong>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end border-t pt-4 mt-4">
+             <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
+             <Button variant="destructive" onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 focus:ring-red-600">Delete Listing</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

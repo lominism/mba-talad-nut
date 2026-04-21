@@ -9,6 +9,7 @@ export interface ItemType {
   title: string;
   price: number;
   quality: "New" | "Used";
+  status?: "AVAILABLE" | "RESERVED" | "SOLD";
   sellerName: string;
   sellerAvatar?: string;
   imageUrls: string[];
@@ -35,12 +36,29 @@ export function ItemCard({ item }: { item: ItemType }) {
         </Badge>
       </div>
 
+      {/* Status Strip */}
+      <div className={`w-full px-4 py-1.5 flex items-center justify-center ${
+        item.status === "AVAILABLE"
+          ? "bg-emerald-50 border-y border-emerald-100"
+          : item.status === "RESERVED"
+          ? "bg-blue-50 border-y border-blue-100"
+          : "bg-slate-50 border-y border-slate-100"
+      }`}>
+        <span className={`text-xs font-semibold tracking-wide ${
+          item.status === "AVAILABLE" ? "text-emerald-700"
+          : item.status === "RESERVED" ? "text-blue-700"
+          : "text-slate-500"
+        }`}>
+          {item.status === "AVAILABLE" ? "● Available" : item.status === "RESERVED" ? "● Reserved" : "● Sold"}
+        </span>
+      </div>
+
       <CardHeader className="p-4 pb-2">
         <div className="flex justify-between items-start gap-2">
           <h3 className="font-semibold text-lg line-clamp-1">{item.title}</h3>
         </div>
         <div className="flex gap-2 text-sm text-muted-foreground mt-1">
-          <Badge variant="outline" className="font-normal text-xs">{item.quality}</Badge>
+          <Badge variant="outline" className="font-normal text-xs w-fit">{item.quality}</Badge>
         </div>
       </CardHeader>
 

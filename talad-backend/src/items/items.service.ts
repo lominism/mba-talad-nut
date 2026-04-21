@@ -53,7 +53,7 @@ export class ItemsService {
     });
   }
 
-  async updateStatus(id: string, status: ItemStatus) {
+  async updateStatus(id: string, status: ItemStatus, firebaseUid?: string) {
     const item = await this.itemsRepository.findOne({ where: { id }, relations: ['reservedBy'] });
     if (!item) throw new NotFoundException('Item not found');
 
@@ -62,8 +62,32 @@ export class ItemsService {
     // If status is changed back to AVAILABLE, clear the reservedBy relationship. 
     if (status === ItemStatus.AVAILABLE) {
       item.reservedBy = null;
+    } else if (status === ItemStatus.RESERVED && firebaseUid) {
+      const user = await this.usersService.findByFirebaseUid(firebaseUid);
+      if (user) {
+        item.reservedBy = user;
+      }
     }
 
     return await this.itemsRepository.save(item);
+  }
+
+  async update(id: string, data: Partial<Item>) {
+    const item = await this.itemsRepository.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Item not found');
+
+    if (data.name !== undefined) item.name = data.name;
+    if (data.price !== undefined) item.price = data.price;
+    if (data.description !== undefined) item.description = data.description;
+    if (data.photoUrls !== undefined) item.photoUrls = data.photoUrls;
+
+    return await this.itemsRepository.save(item);
+  }
+
+  async remove(id: string) {
+    const item = await this.itemsRepository.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Item not found');
+
+    return await this.itemsRepository.softRemove(item);
   }
 }

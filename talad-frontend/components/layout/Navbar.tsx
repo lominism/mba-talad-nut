@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ShoppingBag, PlusCircle, UserCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [dbProfile, setDbProfile] = useState<{ firstName: string; lastName: string; photoUrl?: string } | null>(null);
 
@@ -41,8 +43,9 @@ export function Navbar() {
     return () => unsubscribe();
   }, []);
 
-  const handleSignOut = () => {
-    signOut(auth);
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/');
   };
 
   const getInitials = () => {
