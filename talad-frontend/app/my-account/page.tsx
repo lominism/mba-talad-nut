@@ -46,18 +46,21 @@ export default function MyAccountPage() {
       }
       
       setCurrentUser(user);
+      setEmail(user.email || "");
       
       try {
         const res = await fetch(`${API_URL}/users/${user.uid}`);
         if (res.ok) {
-          const profile = await res.json();
-          setFirstName(profile.firstName || "");
-          setLastName(profile.lastName || "");
-          setNickname(profile.nickname || "");
-          setDepartment(profile.department || "");
-          setEmail(profile.email || "");
-          setPhotoUrl(profile.photoUrl || "");
-          setPhoneNumber(profile.phoneNumber || "");
+          const text = await res.text();
+          if (text) {
+            const profile = JSON.parse(text);
+            setFirstName(profile.firstName || "");
+            setLastName(profile.lastName || "");
+            setNickname(profile.nickname || "");
+            setDepartment(profile.department || "");
+            setPhotoUrl(profile.photoUrl || "");
+            setPhoneNumber(profile.phoneNumber || "");
+          }
         }
       } catch (err) {
         console.error("Failed to load profile", err);
@@ -100,6 +103,7 @@ export default function MyAccountPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          email,
           firstName,
           lastName,
           nickname,

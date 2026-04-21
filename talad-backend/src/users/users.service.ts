@@ -44,9 +44,21 @@ export class UsersService {
     return await this.usersRepository.findOne({ where: { firebaseUid } });
   }
 
-  async updateProfile(firebaseUid: string, payload: { firstName?: string; lastName?: string; nickname?: string; department?: string; photoUrl?: string; phoneNumber?: string }) {
-    const user = await this.findByFirebaseUid(firebaseUid);
-    if (!user) return null;
+  async updateProfile(firebaseUid: string, payload: { email?: string; firstName?: string; lastName?: string; nickname?: string; department?: string; photoUrl?: string; phoneNumber?: string }) {
+    let user = await this.findByFirebaseUid(firebaseUid);
+    
+    if (!user) {
+      if (!payload.email) throw new BadRequestException('Email required to create new user record');
+      // If user isn't in this database yet, create them!
+      user = this.usersRepository.create({ 
+        firebaseUid, 
+        email: payload.email,
+        firstName: payload.firstName || '',
+        lastName: payload.lastName || '',
+        department: payload.department || 'General'
+      });
+    }
+    
     Object.assign(user, payload);
     return await this.usersRepository.save(user);
   }

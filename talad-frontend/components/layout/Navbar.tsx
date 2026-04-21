@@ -31,8 +31,11 @@ export function Navbar() {
         try {
           const res = await fetch(`${API_URL}/users/${currentUser.uid}`);
           if (res.ok) {
-            const data = await res.json();
-            setDbProfile(data);
+            const text = await res.text();
+            if (text) {
+              const data = JSON.parse(text);
+              setDbProfile(data);
+            }
           }
         } catch (err) {
           console.error("Failed to fetch Postgres profile", err);
