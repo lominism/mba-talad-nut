@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, PlusCircle, UserCircle, LogOut } from 'lucide-react';
+import { ShoppingBag, PlusCircle, UserCircle, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -74,7 +74,27 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto max-w-7xl flex h-16 items-center px-4 justify-between">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6">
+          <div className="md:hidden flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus-visible:outline-none focus:outline-none flex items-center justify-center p-2 -ml-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle menu</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 mt-2">
+                <DropdownMenuItem className="cursor-pointer py-2.5">
+                  <Link href="/" className="w-full h-full">
+                    Market Feed
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer py-2.5">
+                  <Link href="/browse" className="w-full h-full">
+                    Browse
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold text-blue-600 tracking-tight">MBS</span>
             <span className="text-3xl text-foreground ml-2 font-caveat origin-bottom -rotate-2">Talad Nut</span>
