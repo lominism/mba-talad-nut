@@ -5,9 +5,64 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { API_URL } from "@/lib/api-config";
 
+import { Metadata, ResolvingMetadata } from 'next';
+
 export const dynamic = 'force-dynamic';
 
-export default async function SellerPage({ params }: { params: Promise<{ id: string }> }) {
+interface Props {
+  params: Promise<{ id: string }>;
+}
+
+async function getSellerData(id: string) {
+  try {
+    const res = await fetch(`${API_URL}/users`, { cache: "no-store" });
+    if (res.ok) {
+      const allUsers = await res.json();
+      return allUsers.find((u: any) => u.id === id);
+    }
+  } catch (err) {
+    console.error("Failed to fetch seller for metadata", err);
+  }
+  return null;
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { id } = await params;
+  const user = await getSellerData(id);
+
+  if (!user) {
+    return {
+      title: 'Seller Not Found | MBS Talad Nut',
+    };
+  }
+
+  const name = user.nickname || user.firstName;
+  const previousImages = (await parent).openGraph?.images || [];
+  const userImage = user.photoUrl;
+
+  return {
+    title: `${name}'s Shop | MBS Talad Nut`,
+    description: `Browse items listed by ${name} from ${user.department || 'MBS'} on MBS Talad Nut.`,
+    openGraph: {
+      title: `${name}'s Shop | MBS Talad Nut`,
+      description: `Browse items listed by ${name} on MBS Talad Nut.`,
+      images: userImage ? [userImage, ...previousImages] : previousImages,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${name}'s Shop | MBS Talad Nut`,
+      description: `Browse items listed by ${name} on MBS Talad Nut.`,
+      images: userImage ? [userImage] : [],
+    },
+  };
+}
+
+export default async function SellerPage({ params }: Props) {
+
   const { id } = await params;
   let items: any[] = [];
   let user: any = null;
