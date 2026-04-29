@@ -152,7 +152,7 @@ export default function RegisterPage() {
               <Input 
                 id="email" 
                 type="email" 
-                placeholder="name@magicboxsolution.com" 
+                placeholder="All Magic Box Group emails are valid" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required 
