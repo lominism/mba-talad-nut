@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { DEPARTMENTS } from "@/lib/departments";
 
 export default function MyAccountPage() {
   const router = useRouter();
+  const t = useTranslations('MyAccount');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -130,7 +132,7 @@ export default function MyAccountPage() {
   if (isLoadingAuth) {
     return (
       <div className="flex bg-muted/20 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-        <div className="text-muted-foreground animate-pulse font-medium">Loading your profile...</div>
+        <div className="text-muted-foreground animate-pulse font-medium">{t('loading')}</div>
       </div>
     );
   }
@@ -139,9 +141,9 @@ export default function MyAccountPage() {
     <div className="container max-w-xl mx-auto py-10 px-4 bg-muted/10 min-h-[calc(100vh-4rem)]">
       <Card className="shadow-lg border-muted/50">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">My Account</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('title')}</CardTitle>
           <CardDescription>
-            Manage your personal profile details and avatar.
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSaveProfile}>
@@ -173,36 +175,36 @@ export default function MyAccountPage() {
                   disabled={isUploading}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">Click the circle to upload a new profile picture</p>
+              <p className="text-xs text-muted-foreground">{t('uploadAvatar')}</p>
             </div>
 
             {/* Email (Disabled) */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address <span className="text-muted-foreground font-normal">(Cannot be changed)</span></Label>
+              <Label htmlFor="email">{t('emailLabel')} <span className="text-muted-foreground font-normal">{t('cannotChange')}</span></Label>
               <Input id="email" type="email" value={email} disabled className="bg-muted cursor-not-allowed" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName">{t('firstName')}</Label>
                 <Input id="firstName" value={firstName} onChange={e => setFirstName(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t('lastName')}</Label>
                 <Input id="lastName" value={lastName} onChange={e => setLastName(e.target.value)} required />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nickname">Nickname (Optional)</Label>
+                <Label htmlFor="nickname">{t('nickname')}</Label>
                 <Input id="nickname" value={nickname} onChange={e => setNickname(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
+                <Label htmlFor="department">{t('department')}</Label>
                 <Select value={department} onValueChange={(val) => setDepartment(val as string)}>
                   <SelectTrigger id="department" className="w-full">
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t('selectDepartment')} />
                   </SelectTrigger>
                   <SelectContent>
                     {DEPARTMENTS.map(dept => (
@@ -217,12 +219,12 @@ export default function MyAccountPage() {
             <div className="space-y-2">
               <Label htmlFor="phoneNumber" className="flex items-center gap-1.5">
                 <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                Phone Number <span className="text-muted-foreground font-normal">(Optional — But a good idea so seller can contact you)</span>
+                {t('phone')} <span className="text-muted-foreground font-normal">{t('phoneDesc')}</span>
               </Label>
               <Input
                 id="phoneNumber"
                 type="tel"
-                placeholder="e.g. 081-234-5678"
+                placeholder={t('phonePlaceholder')}
                 value={phoneNumber}
                 onChange={e => setPhoneNumber(formatPhoneNumber(e.target.value))}
                 maxLength={12}
@@ -233,10 +235,10 @@ export default function MyAccountPage() {
           </CardContent>
           <CardFooter className="flex justify-end gap-3 border-t p-6 bg-muted/10">
             <Button variant="outline" type="button" onClick={() => router.push("/")}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={isSaving || isUploading}>
-              {isSaving ? "Saving..." : "Save Profile"}
+              {isSaving ? t('saving') : t('saveProfile')}
             </Button>
           </CardFooter>
         </form>

@@ -1,6 +1,6 @@
 const ALLOWED_DOMAINS = ["@magicboxsolution.com", "@magicboxasia.com", "@launchpad.co.th", "@magicbox.digital"];
 const ALLOWED_SPECIFIC_EMAILS = [
-  "guest@example.com", // Replace with your allowed email 1
+  "Eaggapon_555@hotmail.com",
   "tester@gmail.com"   // Replace with your allowed email 2
 ];
 

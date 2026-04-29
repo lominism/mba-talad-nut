@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { isEmailAllowed, AUTH_ERROR_MESSAGE } from "@/lib/auth-utils";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useTranslations('Register');
   
   // Registration data
   const [firstName, setFirstName] = useState("");
@@ -35,7 +37,7 @@ export default function RegisterPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t('passwordsDoNotMatch') || "Passwords do not match.");
       return;
     }
 
@@ -45,7 +47,7 @@ export default function RegisterPage() {
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(t('passwordLength') || "Password must be at least 6 characters.");
       return;
     }
 
@@ -86,9 +88,9 @@ export default function RegisterPage() {
     <div className="flex bg-muted/20 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <Card className="w-full max-w-lg shadow-lg border-muted/50 my-8">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">{t('title')}</CardTitle>
           <CardDescription>
-            Register using your Magic Box Solutions email address.
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleRegister}>
@@ -101,7 +103,7 @@ export default function RegisterPage() {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName">{t('firstName')}</Label>
                 <Input 
                   id="firstName" 
                   type="text" 
@@ -111,7 +113,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t('lastName')}</Label>
                 <Input 
                   id="lastName" 
                   type="text" 
@@ -124,7 +126,7 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nickname">Nickname (Optional)</Label>
+                <Label htmlFor="nickname">{t('nickname')}</Label>
                 <Input 
                   id="nickname" 
                   type="text" 
@@ -133,10 +135,10 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
+                <Label htmlFor="department">{t('department')}</Label>
                 <Select value={department} onValueChange={(val) => setDepartment(val as string)}>
                   <SelectTrigger id="department" className="w-full">
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder={t('selectDepartment')} />
                   </SelectTrigger>
                   <SelectContent>
                     {DEPARTMENTS.map(dept => (
@@ -148,47 +150,47 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2 border-t pt-4 mt-2">
-              <Label htmlFor="email">Work Email</Label>
+              <Label htmlFor="email">{t('workEmail')}</Label>
               <Input 
                 id="email" 
                 type="email" 
-                placeholder="All Magic Box Group emails are valid" 
+                placeholder={t('emailPlaceholder')} 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required 
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input 
                 id="password" 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required 
-                placeholder="Minimum 6 characters"
+                placeholder={t('passwordPlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Verify Password</Label>
+              <Label htmlFor="confirmPassword">{t('verifyPassword')}</Label>
               <Input 
                 id="confirmPassword" 
                 type="password" 
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required 
-                placeholder="Confirm your password"
+                placeholder={t('verifyPlaceholder')}
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-4 border-t bg-muted/10">
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Sign up"}
+              {isSubmitting ? t('creatingAccount') : t('signUp')}
             </Button>
             <div className="text-center text-sm text-muted-foreground w-full">
-              Already have an account?{" "}
+              {t('alreadyHaveAccount')}{" "}
               <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-500">
-                Sign in here
+                {t('signInHere')}
               </Link>
             </div>
           </CardFooter>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useRouter } from '@/i18n/routing';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from "next-intl";
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ interface Item {
 }
 
 export default function MyListingsPage() {
+  const t = useTranslations('MyListings');
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Item[]>([]);
@@ -73,7 +75,7 @@ export default function MyListingsPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center mt-20">Loading...</div>;
+    return <div className="flex justify-center mt-20">{t('loading')}</div>;
   }
   if (!user) return null;
 
@@ -150,20 +152,20 @@ export default function MyListingsPage() {
 
   const renderBadge = (status: string) => {
     if (status === 'AVAILABLE') {
-      return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors shadow-sm cursor-pointer border-emerald-300 px-3 py-1 text-xs uppercase tracking-wider">Listed</Badge>;
+      return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors shadow-sm cursor-pointer border-emerald-300 px-3 py-1 text-xs uppercase tracking-wider">{t('listed')}</Badge>;
     }
     if (status === 'RESERVED') {
-      return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors shadow-sm cursor-pointer border-amber-300 px-3 py-1 text-xs uppercase tracking-wider">Pending</Badge>;
+      return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors shadow-sm cursor-pointer border-amber-300 px-3 py-1 text-xs uppercase tracking-wider">{t('pending')}</Badge>;
     }
-    return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors shadow-sm cursor-pointer border-gray-300 px-3 py-1 text-xs uppercase tracking-wider">Sold</Badge>;
+    return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors shadow-sm cursor-pointer border-gray-300 px-3 py-1 text-xs uppercase tracking-wider">{t('sold')}</Badge>;
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">My Listings</h1>
-          <p className="text-muted-foreground mt-1">Manage the items you are selling and their statuses.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">{t('title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
       </div>
       
@@ -173,11 +175,11 @@ export default function MyListingsPage() {
             <table className="w-full text-sm text-left">
               <thead className="bg-slate-50 text-slate-600 border-b">
                 <tr>
-                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">Image</th>
-                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">Name</th>
-                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">Status</th>
-                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">Reserved By</th>
-                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs text-right">Actions</th>
+                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">{t('colImage')}</th>
+                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">{t('colName')}</th>
+                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">{t('colStatus')}</th>
+                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs">{t('colReservedBy')}</th>
+                  <th className="px-6 py-4 font-semibold uppercase tracking-wide text-xs text-right">{t('colActions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y relative bg-white">
@@ -185,9 +187,9 @@ export default function MyListingsPage() {
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center">
-                        <p className="text-lg font-medium text-slate-600">No listings found</p>
-                        <p className="text-sm mt-1 mb-4">You have not posted any items yet.</p>
-                        <Button onClick={() => router.push('/post')}>Post an Item</Button>
+                        <p className="text-lg font-medium text-slate-600">{t('noListings')}</p>
+                        <p className="text-sm mt-1 mb-4">{t('noListingsDesc')}</p>
+                        <Button onClick={() => router.push('/post')}>{t('postAnItem')}</Button>
                       </div>
                     </td>
                   </tr>
@@ -200,7 +202,7 @@ export default function MyListingsPage() {
                             {item.photoUrls && item.photoUrls.length > 0 ? (
                               <img src={item.photoUrls[0]} alt={item.name} className="object-cover w-full h-full group-hover/img:scale-105 transition-transform duration-300" />
                             ) : (
-                              <div className="bg-muted w-full h-full flex items-center justify-center text-xs text-muted-foreground font-medium">None</div>
+                              <div className="bg-muted w-full h-full flex items-center justify-center text-xs text-muted-foreground font-medium">{t('none')}</div>
                             )}
                           </div>
                         </Link>
@@ -215,7 +217,7 @@ export default function MyListingsPage() {
                           <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                           {renderBadge(item.status)}
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-1 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">Click to edit</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">{t('clickToEdit')}</p>
                       </td>
                       <td className="px-6 py-4 text-slate-600 font-medium">
                         {item.reservedBy ? (
@@ -230,23 +232,23 @@ export default function MyListingsPage() {
                             <Phone className="h-3 w-3 text-blue-400 opacity-0 group-hover/buyer:opacity-100 transition-opacity" />
                           </button>
                         ) : (
-                          <span className="text-slate-400 italic">None</span>
+                          <span className="text-slate-400 italic">{t('none')}</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-slate-400 transition-colors cursor-pointer">
+                          <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-slate-400 transition-colors cursor-pointer">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4 text-slate-600" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => router.push(`/my-listings/edit/${item.id}`)} className="cursor-pointer">
                               <Edit className="mr-2 h-4 w-4" />
-                              <span>Edit</span>
+                              <span>{t('edit')}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDeleteClick(item)} className="cursor-pointer text-red-600 focus:text-red-600">
                               <Trash2 className="mr-2 h-4 w-4" />
-                              <span>Delete</span>
+                              <span>{t('delete')}</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -263,11 +265,11 @@ export default function MyListingsPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">Update Listing Status</DialogTitle>
+            <DialogTitle className="text-xl">{t('updateStatusTitle')}</DialogTitle>
             <DialogDescription className="text-sm pt-2">
               {selectedItem ? (
                 <span>
-                  Change the status for <strong>{selectedItem.name}</strong>.
+                  {t('updateStatusDesc', { name: selectedItem.name })}
                 </span>
               ) : ''}
             </DialogDescription>
@@ -285,11 +287,11 @@ export default function MyListingsPage() {
                   {isUpdating && updatingStatusTo === 'SOLD' ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
-                  Confirm Sale (Mark as Sold)
+                  {t('confirmSale')}
                 </Button>
                 <div className="flex items-center gap-4 text-sm text-slate-400 my-2">
                   <div className="flex-1 h-[1px] bg-slate-200"></div>
-                  <span>OR</span>
+                  <span>{t('or')}</span>
                   <div className="flex-1 h-[1px] bg-slate-200"></div>
                 </div>
                 <Button 
@@ -302,7 +304,7 @@ export default function MyListingsPage() {
                   {isUpdating && updatingStatusTo === 'AVAILABLE' ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
-                  Cancel Reservation (Buyer Backed Out)
+                  {t('cancelReservation')}
                 </Button>
               </div>
             )}
@@ -318,20 +320,20 @@ export default function MyListingsPage() {
                   {isUpdating && updatingStatusTo === 'SOLD' ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
-                  Mark as Sold (Sold elsewhere)
+                  {t('markAsSold')}
                 </Button>
               </div>
             )}
 
             {selectedItem?.status === 'SOLD' && (
               <div className="text-sm text-center text-slate-500 bg-slate-50 p-4 rounded-md border border-slate-100">
-                This item is already sold and its status cannot be changed.
+                {t('alreadySold')}
               </div>
             )}
           </div>
           
           <DialogFooter className="sm:justify-center border-t pt-4">
-            <Button variant="ghost" className="text-slate-500" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button variant="ghost" className="text-slate-500" onClick={() => setIsModalOpen(false)}>{t('cancel')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -339,13 +341,13 @@ export default function MyListingsPage() {
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl text-red-600">Confirm Deletion</DialogTitle>
+            <DialogTitle className="text-xl text-red-600">{t('confirmDeleteTitle')}</DialogTitle>
             <DialogDescription className="text-sm pt-2">
-              Are you sure you want to delete <strong>{itemToDelete?.name}</strong>? This action cannot be undone.
+              {t('confirmDeleteDesc', { name: itemToDelete?.name || '' })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-end border-t pt-4 mt-4">
-             <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting}>Cancel</Button>
+             <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting}>{t('cancel')}</Button>
              <Button 
                variant="destructive" 
                onClick={confirmDelete} 
@@ -353,7 +355,7 @@ export default function MyListingsPage() {
                disabled={isDeleting}
              >
                 {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {isDeleting ? "Deleting..." : "Delete Listing"}
+                {isDeleting ? t('deleting') : t('deleteListing')}
              </Button>
           </DialogFooter>
         </DialogContent>
@@ -365,10 +367,10 @@ export default function MyListingsPage() {
           <DialogHeader>
             <DialogTitle className="text-xl flex items-center gap-2">
               <UserIcon className="h-5 w-5 text-blue-600" />
-              Buyer Information
+              {t('buyerInfoTitle')}
             </DialogTitle>
             <DialogDescription className="text-sm pt-1">
-              Contact details for the person who reserved this item.
+              {t('buyerInfoDesc')}
             </DialogDescription>
           </DialogHeader>
 
@@ -401,7 +403,7 @@ export default function MyListingsPage() {
                   <Phone className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Phone</p>
+                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">{t('phone')}</p>
                   {buyerInfo.phoneNumber ? (
                     <a
                       href={`tel:${buyerInfo.phoneNumber}`}
@@ -410,7 +412,7 @@ export default function MyListingsPage() {
                       {buyerInfo.phoneNumber}
                     </a>
                   ) : (
-                    <p className="text-sm text-slate-400 italic">Not provided</p>
+                    <p className="text-sm text-slate-400 italic">{t('notProvided')}</p>
                   )}
                 </div>
               </div>
@@ -422,7 +424,7 @@ export default function MyListingsPage() {
                     <UserIcon className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Email</p>
+                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">{t('email')}</p>
                     <a
                       href={`mailto:${buyerInfo.email}`}
                       className="text-sm font-semibold text-blue-700 hover:underline"
@@ -437,7 +439,7 @@ export default function MyListingsPage() {
 
           <DialogFooter className="border-t pt-4">
             <Button variant="ghost" className="text-slate-500" onClick={() => setIsBuyerModalOpen(false)}>
-              Close
+              {t('close')}
             </Button>
           </DialogFooter>
         </DialogContent>

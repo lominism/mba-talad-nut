@@ -10,7 +10,8 @@ import { ShoppingBag, Loader2, PackageX, Lock, AlertCircle } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { API_URL } from "@/lib/api-config";
 
 export interface ItemClientProps {
@@ -20,6 +21,7 @@ export interface ItemClientProps {
 
 export function ItemClient({ id, initialData }: ItemClientProps) {
   const router = useRouter();
+  const t = useTranslations('Item');
   const [displayItem, setDisplayItem] = useState<any>(initialData || null);
   const [mainImage, setMainImage] = useState<string>(initialData?.photoUrls?.[0] || "");
   const [loading, setLoading] = useState(!initialData);
@@ -88,8 +90,8 @@ export function ItemClient({ id, initialData }: ItemClientProps) {
     return (
       <div className="flex flex-col bg-muted/10 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
         <PackageX className="h-16 w-16 text-muted-foreground opacity-50 mb-4" />
-        <p className="text-xl font-bold text-foreground">Item not found</p>
-        <p className="text-muted-foreground">This item may have been deleted or is no longer available.</p>
+        <p className="text-xl font-bold text-foreground">{t('notFound')}</p>
+        <p className="text-muted-foreground">{t('notFoundDesc')}</p>
       </div>
     );
   }
@@ -130,7 +132,7 @@ export function ItemClient({ id, initialData }: ItemClientProps) {
               <h1 className="text-3xl font-bold tracking-tight text-foreground">{displayItem.name}</h1>
               {displayItem.status === 'RESERVED' && (
                 <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200">
-                  Reserved
+                  {t('reserved')}
                 </Badge>
               )}
             </div>
@@ -145,16 +147,16 @@ export function ItemClient({ id, initialData }: ItemClientProps) {
               </Avatar>
               <div className="text-sm">
                 <span className="font-medium text-foreground">
-                  {displayItem.seller ? (displayItem.seller.nickname || displayItem.seller.firstName) : "Unknown"}
+                  {displayItem.seller ? (displayItem.seller.nickname || displayItem.seller.firstName) : t('unknown')}
                 </span>
-                <span className="text-xs ml-2">({displayItem.seller?.department || "General"})</span>
+                <span className="text-xs ml-2">({displayItem.seller?.department || t('general')})</span>
               </div>
             </div>
 
             {/* Price in Baht or FREE */}
             <p className="text-4xl font-bold text-blue-600 tracking-tight">
               {displayItem.price === 0 ? (
-                "FREE"
+                t('free')
               ) : (
                 <>
                   <span className="text-2xl mr-1 font-medium opacity-80">฿</span>
@@ -168,12 +170,12 @@ export function ItemClient({ id, initialData }: ItemClientProps) {
               {!user ? (
                 <Button size="lg" className="w-full text-lg h-14 bg-slate-800 hover:bg-slate-700 transition" onClick={() => router.push('/login')}>
                   <Lock className="mr-3 h-5 w-5" />
-                  Login to Reserve
+                  {t('loginToReserve')}
                 </Button>
               ) : user.uid === displayItem.seller?.firebaseUid ? (
                 <Button size="lg" className="w-full text-lg h-14" variant="outline" disabled>
                   <ShoppingBag className="mr-3 h-6 w-6" />
-                  This is your listing
+                  {t('yourListing')}
                 </Button>
               ) : (
                 <Button
@@ -187,7 +189,7 @@ export function ItemClient({ id, initialData }: ItemClientProps) {
                   ) : (
                     <ShoppingBag className="mr-3 h-6 w-6" />
                   )}
-                  {reserving ? 'Reserving...' : displayItem.status === 'AVAILABLE' ? 'Reserve Item' : 'Reserved'}
+                  {reserving ? t('reserving') : displayItem.status === 'AVAILABLE' ? t('reserveItem') : t('reserved')}
                 </Button>
               )}
               {reserveError && (
@@ -200,7 +202,7 @@ export function ItemClient({ id, initialData }: ItemClientProps) {
 
           {/* Description Area */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-xl text-foreground">Description</h3>
+            <h3 className="font-semibold text-xl text-foreground">{t('description')}</h3>
             <p className="text-muted-foreground leading-relaxed text-md whitespace-pre-line">
               {displayItem.description}
             </p>
@@ -213,22 +215,21 @@ export function ItemClient({ id, initialData }: ItemClientProps) {
           <DialogHeader>
             <DialogTitle className="text-xl flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-blue-600" />
-              Confirm Reservation
+              {t('confirmResTitle')}
             </DialogTitle>
             <DialogDescription className="text-sm pt-2">
-              Are you sure you want to reserve <strong>{displayItem.name}</strong>? 
-              This will notify the seller.
+              {t('confirmResDesc', { name: displayItem.name })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-end border-t pt-4 mt-4">
             <Button variant="ghost" onClick={() => setIsConfirmModalOpen(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button 
               className="bg-blue-600 hover:bg-blue-700 text-white"
               onClick={handleReserve}
             >
-              Confirm Reservation
+              {t('confirmReservation')}
             </Button>
           </DialogFooter>
         </DialogContent>

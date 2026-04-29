@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { API_URL } from '@/lib/api-config';
@@ -15,6 +16,7 @@ import { UploadCloud, X, Loader2, Star } from "lucide-react";
 export default function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const router = useRouter();
+  const t = useTranslations('EditListing');
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,7 +130,10 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
   if (isLoading) {
     return (
       <div className="flex bg-muted/10 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-        <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 text-blue-600 animate-spin mb-4" />
+          <p className="text-muted-foreground">{t('loading')}</p>
+        </div>
       </div>
     );
   }
@@ -137,27 +142,27 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
     <div className="container max-w-2xl mx-auto py-10 px-4 bg-muted/10 min-h-[calc(100vh-4rem)]">
       <Card className="shadow-lg border-muted/50">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Edit Listing</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('title')}</CardTitle>
           <CardDescription>
-            Update the details of your item.
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             
             <div className="space-y-2">
-              <Label htmlFor="title">Item Title <span className="text-red-500">*</span></Label>
+              <Label htmlFor="title">{t('itemTitle')} <span className="text-red-500">*</span></Label>
               <Input 
                 id="title" 
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)} 
-                placeholder="e.g. Ergonomic Office Chair" 
+                placeholder={t('titlePlaceholder')} 
                 required 
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Price (THB)</Label>
+              <Label htmlFor="price">{t('price')}</Label>
               <Input 
                 id="price" 
                 type="number" 
@@ -169,19 +174,19 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description (Optional)</Label>
+              <Label htmlFor="description">{t('description')}</Label>
               <Textarea 
                 id="description" 
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
-                placeholder="Include any relevant details like brand, age, or reason for selling." 
+                placeholder={t('descPlaceholder')} 
                 className="min-h-[100px]"
               />
             </div>
 
             <div className="space-y-4">
-              <Label>Item Photos</Label>
-              <p className="text-sm text-muted-foreground mt-0 mb-3">The first image is the main cover photo for your listing.</p>
+              <Label>{t('itemPhotos')}</Label>
+              <p className="text-sm text-muted-foreground mt-0 mb-3">{t('mainImageTip')}</p>
               
               {/* Uploaded Thumbnails Preview */}
               {imageUrls.length > 0 && (
@@ -202,7 +207,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
                       {/* Main Image Banner / Action */}
                       {idx === 0 ? (
                         <div className="absolute bottom-0 inset-x-0 bg-amber-400/90 text-amber-950 text-[10px] font-bold text-center py-1 flex justify-center items-center gap-1 backdrop-blur-sm">
-                          <Star className="h-3 w-3 fill-amber-950" /> Main Image
+                          <Star className="h-3 w-3 fill-amber-950" /> {t('mainImage')}
                         </div>
                       ) : (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -213,7 +218,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
                              onClick={() => setAsMainImage(idx)}
                              className="h-7 text-xs font-medium cursor-pointer shadow-md w-10/12"
                            >
-                             Set as Main
+                             {t('setAsMain')}
                            </Button>
                         </div>
                       )}
@@ -239,19 +244,19 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
                   )}
                 </div>
                 <div className="text-sm font-medium pointer-events-none">
-                  {isUploading ? "Uploading to Cloudinary..." : "Click to upload or drag and drop"}
+                  {isUploading ? t('uploading') : t('clickToUpload')}
                 </div>
-                <div className="text-xs text-muted-foreground pointer-events-none">PNG, JPG, WEBP</div>
+                <div className="text-xs text-muted-foreground pointer-events-none">{t('formats')}</div>
               </div>
             </div>
 
           </CardContent>
           <CardFooter className="flex justify-end gap-3 border-t p-6 bg-muted/10">
             <Button variant="outline" type="button" onClick={() => router.push("/my-listings")}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={isSubmitting || isUploading}>
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isSubmitting ? t('saving') : t('saveChanges')}
             </Button>
           </CardFooter>
         </form>

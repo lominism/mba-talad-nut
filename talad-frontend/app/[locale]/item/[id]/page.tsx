@@ -35,19 +35,20 @@ export async function generateMetadata(
 
   const previousImages = (await parent).openGraph?.images || [];
   const itemImage = item.photoUrls?.[0];
+  const priceDisplay = item.price === 0 ? 'FREE' : `฿${item.price.toLocaleString()}`;
 
   return {
-    title: `${item.name} | MBS Talad Nut`,
+    title: `${item.name} | ${priceDisplay}`,
     description: item.description || `Check out this ${item.name} on MBS Talad Nut.`,
     openGraph: {
-      title: `${item.name} | MBS Talad Nut`,
+      title: `${item.name} | ${priceDisplay}`,
       description: item.description,
       images: itemImage ? [itemImage, ...previousImages] : previousImages,
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${item.name} | MBS Talad Nut`,
+      title: `${item.name} | ${priceDisplay}`,
       description: item.description,
       images: itemImage ? [itemImage] : [],
     },

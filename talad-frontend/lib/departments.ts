@@ -7,5 +7,6 @@ export const DEPARTMENTS = [
   "Launchpad",
   "MBD",
   "HR",
-  "Accounting"
+  "Accounting",
+  "MMD"
 ];

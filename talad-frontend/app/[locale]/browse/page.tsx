@@ -4,10 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { API_URL } from "@/lib/api-config";
+import { getTranslations } from "next-intl/server";
+import DepartmentFilter from "@/components/browse/DepartmentFilter";
+import { DEPARTMENTS } from "@/lib/departments";
 
 export const dynamic = 'force-dynamic';
 
-export default async function BrowsePage() {
+export default async function BrowsePage({ searchParams }: { searchParams: Promise<{ department?: string }> }) {
+  const params = await searchParams;
+  const deptFilter = params.department || '';
+  const t = await getTranslations('Browse');
   let sellers: any[] = [];
   
   try {
@@ -19,17 +25,28 @@ export default async function BrowsePage() {
     console.error("Failed to load sellers", err);
   }
 
+  if (deptFilter) {
+    sellers = sellers.filter(s => s.department === deptFilter);
+  }
+
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Browse Sellers</h1>
-        <p className="text-muted-foreground mt-1 text-lg">See what your colleagues are offering.</p>
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('title')}</h1>
+          <p className="text-muted-foreground mt-1 text-lg">{t('subtitle')}</p>
+        </div>
+        <DepartmentFilter 
+          departments={DEPARTMENTS} 
+          allLabel={t('allDepartments', { fallback: "All Departments" })} 
+          placeholder={t('filterByDept', { fallback: "Filter by Department" })} 
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sellers.length === 0 ? (
           <div className="col-span-full py-12 text-center text-muted-foreground">
-            <p className="text-lg">No sellers found yet.</p>
+            <p className="text-lg">{t('noSellers')}</p>
           </div>
         ) : (
           sellers.map((seller) => (
@@ -52,9 +69,9 @@ export default async function BrowsePage() {
                   
                   <div className="mt-6 flex items-center justify-between border-t pt-4 border-muted/50">
                     <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
-                      {seller.itemCount || 0} items listed
+                      {t('itemsListed', { count: seller.itemCount || 0 })}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">Joined {new Date(seller.createdAt).getFullYear()}</span>
+                    <span className="text-xs text-muted-foreground">{t('joined', { year: new Date(seller.createdAt).getFullYear() })}</span>
                   </div>
                 </CardContent>
               </Card>

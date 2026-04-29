@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { isEmailAllowed, AUTH_ERROR_MESSAGE } from "@/lib/auth-utils";
 
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslations('Login');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +44,9 @@ export default function LoginPage() {
     <div className="flex bg-muted/20 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg border-muted/50">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">{t('welcomeBack')}</CardTitle>
           <CardDescription>
-            Enter your employee credentials to access your account.
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
@@ -55,7 +57,7 @@ export default function LoginPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Work Email</Label>
+              <Label htmlFor="email">{t('workEmail')}</Label>
               <Input 
                 id="email" 
                 type="email" 
@@ -67,7 +69,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('password')}</Label>
               </div>
               <Input 
                 id="password" 
@@ -80,12 +82,12 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4 pt-4 border-t bg-muted/10">
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={isSubmitting}>
-              {isSubmitting ? "Signing in..." : "Sign in"}
+              {isSubmitting ? t('signingIn') : t('signIn')}
             </Button>
             <div className="text-center text-sm text-muted-foreground w-full">
-              Don&apos;t have an account?{" "}
+              {t('noAccount')}{" "}
               <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-500">
-                Register here
+                {t('registerHere')}
               </Link>
             </div>
           </CardFooter>

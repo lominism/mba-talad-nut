@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { API_URL } from "@/lib/api-config";
 
 export default function PostItemPage() {
   const router = useRouter();
+  const t = useTranslations('Post');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -100,7 +102,7 @@ export default function PostItemPage() {
   if (isLoadingAuth) {
     return (
       <div className="flex bg-muted/20 min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-        <div className="text-muted-foreground animate-pulse font-medium">Verifying session...</div>
+        <div className="text-muted-foreground animate-pulse font-medium">{t('verifyingSession')}</div>
       </div>
     );
   }
@@ -109,48 +111,48 @@ export default function PostItemPage() {
     <div className="container max-w-2xl mx-auto py-10 px-4 bg-muted/10 min-h-[calc(100vh-4rem)]">
       <Card className="shadow-lg border-muted/50">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Post a new item</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('title')}</CardTitle>
           <CardDescription>
-            List an item for sale or give it away for free to your MBS colleagues.
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             
             <div className="space-y-2">
-              <Label htmlFor="title">Item Title <span className="text-red-500">*</span></Label>
-              <Input id="title" placeholder="e.g. Ergonomic Office Chair" required />
+              <Label htmlFor="title">{t('itemTitle')} <span className="text-red-500">*</span></Label>
+              <Input id="title" placeholder={t('titlePlaceholder')} required />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Price (THB)</Label>
-                <Input id="price" type="number" placeholder="Enter 0 if free" min="0" required />
+                <Label htmlFor="price">{t('price')}</Label>
+                <Input id="price" type="number" placeholder={t('pricePlaceholder')} min="0" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="condition">Condition</Label>
+                <Label htmlFor="condition">{t('condition')}</Label>
                 <select 
                   id="condition" 
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   defaultValue="Used"
                 >
-                  <option value="New">New</option>
-                  <option value="Used">Used</option>
+                  <option value="New">{t('new')}</option>
+                  <option value="Used">{t('used')}</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description (Optional)</Label>
+              <Label htmlFor="description">{t('description')}</Label>
               <Textarea 
                 id="description" 
-                placeholder="Include any relevant details like brand, age, or reason for selling." 
+                placeholder={t('descPlaceholder')} 
                 className="min-h-[100px]"
               />
             </div>
 
             <div className="space-y-4">
-              <Label>Item Photos (First photo is cover)</Label>
+              <Label>{t('itemPhotos')}</Label>
               
               {/* Uploaded Thumbnails Preview */}
               {imageUrls.length > 0 && (
@@ -187,19 +189,19 @@ export default function PostItemPage() {
                   )}
                 </div>
                 <div className="text-sm font-medium">
-                  {isUploading ? "Uploading to Cloudinary..." : "Click to upload or drag and drop"}
+                  {isUploading ? t('uploading') : t('clickToUpload')}
                 </div>
-                <div className="text-xs text-muted-foreground">PNG, JPG, WEBP</div>
+                <div className="text-xs text-muted-foreground">{t('formats')}</div>
               </div>
             </div>
 
           </CardContent>
           <CardFooter className="flex justify-end gap-3 border-t p-6 bg-muted/10">
             <Button variant="outline" type="button" onClick={() => router.push("/")}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={isSubmitting}>
-              {isSubmitting ? "Posting..." : "Post Item"}
+              {isSubmitting ? t('posting') : t('postItem')}
             </Button>
           </CardFooter>
         </form>
