@@ -12,15 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2, Phone } from "lucide-react";
 import { API_URL } from "@/lib/api-config";
-
-const DEPARTMENTS = [
-  "MBS-Sales",
-  "MBS-Dev",
-  "MBS-QA",
-  "MBS-HR",
-  "MBS-Executive",
-  "MBS-Design",
-];
+import { DEPARTMENTS } from "@/lib/departments";
 
 export default function MyAccountPage() {
   const router = useRouter();

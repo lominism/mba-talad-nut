@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Badge } from '@/components/ui/badge';
@@ -194,15 +195,21 @@ export default function MyListingsPage() {
                   items.map(item => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="px-6 py-4 w-24">
-                        <div className="relative h-16 w-16 rounded-md overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
-                          {item.photoUrls && item.photoUrls.length > 0 ? (
-                            <img src={item.photoUrls[0]} alt={item.name} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
-                          ) : (
-                            <div className="bg-muted w-full h-full flex items-center justify-center text-xs text-muted-foreground font-medium">None</div>
-                          )}
-                        </div>
+                        <Link href={`/item/${item.id}`} className="block group/img cursor-pointer">
+                          <div className="relative h-16 w-16 rounded-md overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
+                            {item.photoUrls && item.photoUrls.length > 0 ? (
+                              <img src={item.photoUrls[0]} alt={item.name} className="object-cover w-full h-full group-hover/img:scale-105 transition-transform duration-300" />
+                            ) : (
+                              <div className="bg-muted w-full h-full flex items-center justify-center text-xs text-muted-foreground font-medium">None</div>
+                            )}
+                          </div>
+                        </Link>
                       </td>
-                      <td className="px-6 py-4 font-medium text-base text-slate-800 truncate max-w-xs">{item.name}</td>
+                      <td className="px-6 py-4 font-medium text-base text-slate-800 truncate max-w-xs">
+                        <Link href={`/item/${item.id}`} className="hover:text-blue-600 hover:underline transition-colors">
+                          {item.name}
+                        </Link>
+                      </td>
                       <td className="px-6 py-4">
                         <div onClick={() => handleStatusBadgeClick(item)} className="inline-block relative">
                           <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />

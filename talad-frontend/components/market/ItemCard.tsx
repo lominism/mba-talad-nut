@@ -1,8 +1,6 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle } from "lucide-react";
 
 export interface ItemType {
   id: string;
@@ -28,12 +26,6 @@ export function ItemCard({ item }: { item: ItemType }) {
           alt={item.title}
           className="object-cover w-full h-full"
         />
-        <Badge 
-          variant={isFree ? "default" : "secondary"} 
-          className="absolute top-3 right-3 shadow-sm bg-white/90 text-black backdrop-blur-sm hover:bg-white"
-        >
-          {isFree ? "FREE" : `฿${item.price.toLocaleString()}`}
-        </Badge>
       </div>
 
       {/* Status Strip */}
@@ -53,27 +45,33 @@ export function ItemCard({ item }: { item: ItemType }) {
         </span>
       </div>
 
-      <CardHeader className="p-4 pb-2">
-        <div className="flex justify-between items-start gap-2">
-          <h3 className="font-semibold text-lg line-clamp-1">{item.title}</h3>
-        </div>
-        <div className="flex gap-2 text-sm text-muted-foreground mt-1">
-          <Badge variant="outline" className="font-normal text-xs w-fit">{item.quality}</Badge>
+      <CardHeader className="p-4 pb-2 text-center">
+        <h3 className="font-semibold text-lg line-clamp-1">{item.title}</h3>
+        <div className="mt-1">
+          <span className={`text-xl font-bold ${isFree ? "text-emerald-600" : "text-blue-600"}`}>
+            {isFree ? "FREE" : `฿ ${item.price.toLocaleString()}`}
+          </span>
         </div>
       </CardHeader>
 
       <CardContent className="p-4 py-2 flex-grow mb-2">
-        <div className="flex items-center gap-2 mt-2">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={item.sellerAvatar} />
-            <AvatarFallback className="text-xs">{item.sellerName.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className="text-sm">
-            <span className="font-medium">{item.sellerName}</span>
-            <span className="text-xs text-muted-foreground ml-2">({item.department})</span>
+        <div className="flex items-center justify-between mt-2">
+          {/* Seller info left */}
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={item.sellerAvatar} />
+              <AvatarFallback className="text-xs">{item.sellerName.slice(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div className="text-sm">
+              <span className="font-medium text-xs">{item.sellerName}</span>
+              <span className="text-[10px] text-muted-foreground ml-1">({item.department})</span>
+            </div>
           </div>
+          {/* Tag right */}
+          <Badge variant="outline" className="font-normal text-[10px] h-5 px-1.5">{item.quality}</Badge>
         </div>
       </CardContent>
     </Card>
   );
 }
+

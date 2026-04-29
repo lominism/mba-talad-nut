@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { API_URL } from "@/lib/api-config";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DEPARTMENTS } from "@/lib/departments";
+import { isEmailAllowed, AUTH_ERROR_MESSAGE } from "@/lib/auth-utils";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,12 +39,10 @@ export default function RegisterPage() {
       return;
     }
 
-    /* 
-    if (!email.toLowerCase().endsWith("@magicboxsolution.com")) {
-      setError("Only employees with a @magicboxsolution.com email can register.");
+    if (!isEmailAllowed(email)) {
+      setError(AUTH_ERROR_MESSAGE);
       return;
     }
-    */
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
@@ -133,13 +134,16 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="department">Department</Label>
-                <Input 
-                  id="department" 
-                  type="text" 
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  required 
-                />
+                <Select value={department} onValueChange={(val) => setDepartment(val as string)}>
+                  <SelectTrigger id="department" className="w-full">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEPARTMENTS.map(dept => (
+                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

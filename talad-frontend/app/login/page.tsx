@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { isEmailAllowed, AUTH_ERROR_MESSAGE } from "@/lib/auth-utils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,8 +25,8 @@ export default function LoginPage() {
 
     try {
       
-      if (!email.toLowerCase().endsWith("@magicboxsolution.com")) {
-        throw new Error("Please use your @magicboxsolution.com email.");
+      if (!isEmailAllowed(email)) {
+        throw new Error(AUTH_ERROR_MESSAGE);
       }
       
       await signInWithEmailAndPassword(auth, email, password);
